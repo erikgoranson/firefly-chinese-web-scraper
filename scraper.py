@@ -13,6 +13,7 @@ LOGGER = logging.getLogger(__name__)
 PARSER = argparse.ArgumentParser(description='A webscraper for FireflyChinese.com')
 PARSER.add_argument('-s', '--save', action='store_true', help='save the output to JSON')
 PARSER.add_argument('-v', '--verbose', action='store_true', help='print the scraped data to the console')
+PARSER.add_argument('-p', '--page', default=7, type=int, help='the max number of pages to parse from the blog. default is 7 (all currently available pages since 2012)')
 ARGS = PARSER.parse_args()
  
 # returns the value from the given field from a fireflychinese post
@@ -43,9 +44,8 @@ def get_firefly_chinese_data():
     output_data_list = []
     
     base_url = 'https://fireflychinese.com/'
-    blog_pages = 7 # blog has not been updated since 2012. will add something to dynamically check page count if it becomes applicable
     
-    for i in range(0, blog_pages):
+    for i in range(0, ARGS.page):
         if i == 1:
             url = base_url
         else:
