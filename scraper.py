@@ -19,7 +19,7 @@ def save_as_json(list):
 
 # scrapes information from each post at https://fireflychinese.com/
 # loops through all existing pages - currently hardcoded to seven due to no new updates in 10+ years
-def get_firely_chinese_data(): 
+def get_firefly_chinese_data(): 
     output_data_list = []
     
     base_url = 'https://fireflychinese.com/'
@@ -34,7 +34,6 @@ def get_firely_chinese_data():
         #logging
         data = requests.get(url)
         soup = BeautifulSoup(data.content, 'html.parser')
-        print(f'check: {i}')
         
         try: 
             page_content = soup.find('div', class_='postcontainer')
@@ -60,7 +59,6 @@ def get_firely_chinese_data():
             """
             
             raw_title = post_fields[0].text
-            print('title: ', raw_title)
             title_parenthetical = re.findall('\(([^)]+)', raw_title)[0] #get text from inside of the parentheses on each title
             
             # split values into their individual components
@@ -99,10 +97,7 @@ def get_firely_chinese_data():
 
             output_data_list.append(output_data)
         
-    #print(output_data_list)
     save_as_json(output_data_list)
-        
-###############################
 
 if __name__ == '__main__':
-    get_firely_chinese_data()
+    get_firefly_chinese_data()
