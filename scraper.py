@@ -21,7 +21,7 @@ def get_field_value(post_field):
     splits = post_field.split(':')
     if 1 < len(splits):
         return splits[1].strip()
-    return splits
+    return post_field
 
 def save_as_json(list):
     try:
@@ -60,7 +60,6 @@ def get_firefly_chinese_data():
             LOGGER.error(f'An error occurred while parsing HTML on {url}')
             raise
         
-        #for post in posts:
         for i, post in enumerate(posts):
         
             output_data = dict() 
@@ -77,13 +76,13 @@ def get_firefly_chinese_data():
             break this up into three values 
             """
             raw_title = post_fields[0].text
-            title_parenthetical = re.findall('\(([^)]+)', raw_title)[0] #get text from inside of the parentheses on each title
+            title_parenthetical = re.findall('\(([^)]+)', raw_title)[0] # get text from inside of the parentheses on each title
             
             # split values into their individual components
             title_splits = title_parenthetical.split(', ', 1)
             title_sub_splits = title_splits[1].split('”') 
             if len(title_sub_splits) == 1:
-                #sometimes title name is formatted like "title"\xa0 instead of “title”
+                # sometimes title name is formatted like "title"\xa0 instead of “title”
                 title_sub_splits = title_splits[1].split(u'\xa0') 
 
 
