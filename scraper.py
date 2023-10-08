@@ -2,8 +2,11 @@ import requests
 from bs4 import BeautifulSoup
 import re
 import json
+import logging
 
 OUTPUT_FILE = 'firefly_chinese.json'
+logging.basicConfig(level=logging.INFO)
+LOGGER = logging.getLogger(__name__)
  
 # returns the value from the given field from a fireflychinese post
 def get_field_value(post_field):
@@ -14,8 +17,12 @@ def get_field_value(post_field):
 
 def save_as_json(list):
     
-    with open(OUTPUT_FILE, mode='w', encoding='utf-8') as output_file:
-        json.dump(list, output_file, indent=4)
+    try:
+        with open(OUTPUT_FILE, mode='w', encoding='utf-8') as output_file:
+            json.dump(list, output_file, indent=4)
+    except Exception:
+        LOGGER.error(f'An error occurred while trying to save scraped data to json: {Exception}')
+        raise
 
 # scrapes information from each post at https://fireflychinese.com/
 # loops through all existing pages - currently hardcoded to seven due to no new updates in 10+ years
@@ -31,25 +38,24 @@ def get_firefly_chinese_data():
         else:
             url = f'{base_url}page/{i}'
             
-        #logging
-        data = requests.get(url)
-        soup = BeautifulSoup(data.content, 'html.parser')
-        
-        try: 
+        try:
+            data = requests.get(url)
+            soup = BeautifulSoup(data.content, 'html.parser')
             page_content = soup.find('div', class_='postcontainer')
             posts = page_content.find_all('div', class_='video')
         except Exception:
-            #logging
+            LOGGER.error(f'An error occurred while parsing HTML on {url}')
             raise
-    
-        for post in posts:
+        
+        #for post in posts:
+        for i, post in enumerate(posts):
         
             output_data = dict() 
         
             try:
                 post_fields = post.find_all('p')
             except Exception:
-                #logging
+                LOGGER.error(f'An error occurred while parsing HTML on post {i} of {url}')
                 raise
         
             """
@@ -57,7 +63,6 @@ def get_firefly_chinese_data():
             normally formatted such as 'River calls Mal a son of a drooling whore and a monkey (Ep5, “Safe” 2:54)'
             break this up into three values 
             """
-            
             raw_title = post_fields[0].text
             title_parenthetical = re.findall('\(([^)]+)', raw_title)[0] #get text from inside of the parentheses on each title
             
