@@ -3,10 +3,17 @@ from bs4 import BeautifulSoup
 import re
 import json
 import logging
+import argparse
 
 OUTPUT_FILE = 'firefly_chinese.json'
+
 logging.basicConfig(level=logging.INFO)
 LOGGER = logging.getLogger(__name__)
+
+PARSER = argparse.ArgumentParser(description='A webscraper for FireflyChinese.com')
+PARSER.add_argument('-s', '--save', action='store_true', help='save the output to JSON')
+PARSER.add_argument('-v', '--verbose', action='store_true', help='print the scraped data to the console')
+ARGS = PARSER.parse_args()
  
 # returns the value from the given field from a fireflychinese post
 def get_field_value(post_field):
@@ -16,13 +23,19 @@ def get_field_value(post_field):
     return splits
 
 def save_as_json(list):
-    
     try:
         with open(OUTPUT_FILE, mode='w', encoding='utf-8') as output_file:
             json.dump(list, output_file, indent=4)
     except Exception:
         LOGGER.error(f'An error occurred while trying to save scraped data to json: {Exception}')
         raise
+
+def print_output_data(output_list):
+    print('-------------')
+    for item in output_list:
+        for key, value in item.items():
+            print(f'{key}:\t', value)
+        print('-------------')
 
 # scrapes information from each post at https://fireflychinese.com/
 # loops through all existing pages - currently hardcoded to seven due to no new updates in 10+ years
@@ -72,7 +85,7 @@ def get_firefly_chinese_data():
             if len(title_sub_splits) == 1:
                 #sometimes title name is formatted like "title"\xa0 instead of “title”
                 title_sub_splits = title_splits[1].split(u'\xa0') 
-            
+
 
             # clean up the episode number as an actual num as it is inconsistently labled 'ep' or 'episode '
             raw_episode_number = title_splits[0]
@@ -101,8 +114,20 @@ def get_firefly_chinese_data():
                     output_data['pronunciation'] = frame.get('src')
 
             output_data_list.append(output_data)
+            LOGGER.info(f'Added data from {raw_title} to output data')
         
-    save_as_json(output_data_list)
+    if not ARGS.save or ARGS.verbose:
+        print_output_data(output_data_list)
+        
+    if ARGS.save:
+        LOGGER.info(f'Saving data to {OUTPUT_FILE}')
+        save_as_json(output_data_list)
+    else:
+        LOGGER.info('Output data is ready. To save to JSON, use the --save flag')
 
 if __name__ == '__main__':
-    get_firefly_chinese_data()
+    try:
+        get_firefly_chinese_data()
+    except Exception:
+        LOGGER.error(Exception)
+        raise 
