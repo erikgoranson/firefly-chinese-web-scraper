@@ -16,8 +16,8 @@ PARSER = argparse.ArgumentParser(description='A webscraper for fireflychinese.ke
 PARSER.add_argument('-s', '--save', action='store_true', help='save the output to JSON')
 PARSER.add_argument('-v', '--verbose', action='store_true', help='print the scraped data to the console')
 PARSER.add_argument('-u', '--url', default=None, type=str, help='the specific url at fireflychinese.kevinsullivansite.net from which to retrieve chinese translation data') 
-PARSER.add_argument('-t', '--tvseries', action='store_true', help='gets all from all the episodes in Firefly')
-PARSER.add_argument('-f', '--film', action='store_true', help='gets all from Serenity') 
+PARSER.add_argument('-t', '--tvseries', action='store_true', help='gets all translations from every episode in Firefly')
+PARSER.add_argument('-f', '--film', action='store_true', help='gets all translations from Serenity (the film)') 
 ARGS = PARSER.parse_args()
  
 def save_as_json(list):
@@ -98,7 +98,6 @@ def get_firefly_chinese_data(urls):
             
             # categorize by the previous h2 heading
             prev_heading = str(pc.find_previous_sibling('h2').text)
-            print(prev_heading)
             output_data['category'] = prev_heading
             
             foreign_word = pc.find(class_="foreignword")
